@@ -1,109 +1,100 @@
-var app = getApp()
+const WXAPI = require('apifm-wxapi')
+const AUTH = require('../../utils/auth')
+
 Page({
 
   /**
    * 页面的初始数据
    */
   data: {
-  
+    balance: 0.00
   },
 
   /**
    * 生命周期函数--监听页面加载
    */
-  onLoad: function (options) {
-  
+  onLoad: function(options) {
+    this.setData({
+      balance_pay_pwd: wx.getStorageSync('balance_pay_pwd')
+    })
   },
-
-  /**
-   * 生命周期函数--监听页面初次渲染完成
-   */
-  onReady: function () {
-  
+  onShow: function() {
+    AUTH.checkHasLogined().then(isLogined => {
+      if (!isLogined) {
+        AUTH.openLoginDialog()
+      } else {
+        this.userAmount()
+      }
+    })   
   },
-
-  /**
-   * 生命周期函数--监听页面显示
-   */
-  onShow: function () {
-  
+  async userAmount() {
+    const res = await WXAPI.userAmount(wx.getStorageSync('token'))
+    if (res.code === 0) {
+      this.setData({
+        balance: res.data.balance
+      })
+    }
   },
-
-  /**
-   * 生命周期函数--监听页面隐藏
-   */
-  onHide: function () {
-  
+  processLogin(e) {
+    if (!e.detail.userInfo) {
+      wx.showToast({
+        title: '已取消',
+        icon: 'none',
+      })
+      return;
+    }
+    AUTH.register(this);
   },
-
-  /**
-   * 生命周期函数--监听页面卸载
-   */
-  onUnload: function () {
-  
-  },
-
-  /**
-   * 页面相关事件处理函数--监听用户下拉动作
-   */
-  onPullDownRefresh: function () {
-  
-  },
-
-  /**
-   * 页面上拉触底事件的处理函数
-   */
-  onReachBottom: function () {
-  
-  },
-
-  /**
-   * 用户点击右上角分享
-   */
-  onShareAppMessage: function () {
-  
-  },
-  bindCancel: function () {
-    wx.navigateBack({})
-  },
-  bindSave: function (e) {
-    var that = this;
-    var amount = e.detail.value.amount;
-
-    if (amount == "" || amount * 1 < 100) {
-      wx.showModal({
-        title: '错误',
-        content: '请填写正确的提现金额',
-        showCancel: false
+  async bindSave() {
+    let minWidthAmount = wx.getStorageSync('WITHDRAW_MIN');
+    if (!minWidthAmount) {
+      minWidthAmount = 0
+    }
+    const amount = this.data.amount;
+    if (!amount) {
+      wx.showToast({
+        title: '请填写正确的提现金额',
+        icon: 'none',
       })
       return
     }
-    wx.request({
-      url: 'https://api.it120.cc/' + app.globalData.subDomain + '/user/withDraw/apply',
-      data: {
-        token: wx.getStorageSync('token'),
-        money: amount
-      },
-      success: function (res) {
-        if (res.data.code == 0) {
-          wx.showModal({
-            title: '成功',
-            content: '您的提现申请已提交，等待财务打款',
-            showCancel: false,
-            success: function (res) {
-              if (res.confirm) {
-                that.bindCancel();
-              }
-            }
-          })
-        } else {
-          wx.showModal({
-            title: '错误',
-            content: res.data.msg,
-            showCancel: false
-          })
-        }
-      }
+    if (this.data.balance_pay_pwd && !this.data.pwd) {
+      wx.showToast({
+        title: '请输入交易密码',
+        icon: 'none'
+      })
+      return
+    }
+    if (amount * 1 < minWidthAmount) {
+      wx.showToast({
+        title: '提现金额不能低于' + minWidthAmount,
+        icon: 'none',
+      })
+      return
+    }
+    const res = await WXAPI.withDrawApplyV2({
+      token: wx.getStorageSync('token'),
+      money: amount,
+      pwd: this.data.pwd
     })
+    if (res.code == 0) {
+      wx.showModal({
+        title: '成功',
+        content: '您的提现申请已提交，等待财务打款',
+        showCancel: false,
+        success: function(res) {
+          if (res.confirm) {
+            wx.navigateBack({
+              delta: 0,
+            })
+          }
+        }
+      })
+    } else {
+      wx.showToast({
+        title: res.msg,
+        icon: 'none'
+      })
+    }
   }
 })

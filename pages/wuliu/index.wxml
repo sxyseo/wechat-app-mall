@@ -12,7 +12,7 @@
     <view class="sec-wrap">
         <view class="details-info">
             <view class="line-box"></view>
-            <view class="a-row" wx:for-items="{{logisticsTraces}}" wx:key="{{index}}">
+            <view class="a-row" wx:for="{{logisticsTraces}}" wx:key="{{index}}">
                 <view class="dot">
                     <view class="active-dot" hidden="{{index== 0 ? false : true}}"><view class="yuan-red"></view></view>
                     <view class="default-dot" hidden="{{index== 0 ? true : false}}"></view>
@@ -23,16 +23,7 @@
                 </view>
             </view>
 
-            <!--<view class="a-row">
-                <view class="dot">
-                    <view class="default-dot"></view>
-                </view>
-                <view class="info">
-                    <view class="date-box">2016-12-25  15:00:22</view>
-                    <view class="text">货物已到达 上海千阳站</view>
-                </view>
-            </view>-->
-
         </view>
     </view>
 </view>
+<float-menu /> 

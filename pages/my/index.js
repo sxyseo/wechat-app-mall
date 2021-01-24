@@ -1,161 +1,209 @@
-const app = getApp()
+const CONFIG = require('../../config.js')
+const WXAPI = require('apifm-wxapi')
+const AUTH = require('../../utils/auth')
+const TOOLS = require('../../utils/tools.js')
+
+const APP = getApp()
+// fixed首次打开不显示标题的bug
+APP.configLoadOK = () => {
+  
+}
 
 Page({
 	data: {
-    balance:0,
+    balance:0.00,
     freeze:0,
     score:0,
-    score_sign_continuous:0
+    growth:0,
+    score_sign_continuous:0,
+    rechargeOpen: false, // 是否开启充值[预存]功能
+
+    // 用户订单统计数据
+    count_id_no_confirm: 0,
+    count_id_no_pay: 0,
+    count_id_no_reputation: 0,
+    count_id_no_transfer: 0,
+
+    // 判断有没有用户详细资料
+    userInfoStatus: 0 // 0 未读取 1 没有详细信息 2 有详细信息
   },
 	onLoad() {
-    
-	},	
+
+	},
   onShow() {
-    let that = this;
-    let userInfo = wx.getStorageSync('userInfo')
-    if (!userInfo) {
-      wx.navigateTo({
-        url: "/pages/authorize/index"
-      })
-    } else {
-      that.setData({
-        userInfo: userInfo,
-        version: app.globalData.version
-      })
-    }
-    this.getUserApiInfo();
-    this.getUserAmount();
-    this.checkScoreSign();
-  },
-  aboutUs : function () {
-    wx.showModal({
-      title: '关于我们',
-      content: '本系统基于开源小程序商城系统 https://github.com/EastWorld/wechat-app-mall 搭建，祝大家使用愉快！',
-      showCancel:false
+    const _this = this
+    const order_hx_uids = wx.getStorageSync('order_hx_uids')
+    this.setData({
+      version: CONFIG.version,
+      order_hx_uids
+    })
+    AUTH.checkHasLogined().then(isLogined => {
+      if (isLogined) {
+        _this.getUserApiInfo();
+        _this.getUserAmount();
+        _this.orderStatistics();
+        TOOLS.showTabBarBadge();
+      } else {
+        AUTH.authorize().then(res => {
+          _this.getUserApiInfo();
+          _this.getUserAmount();
+          _this.orderStatistics();
+          TOOLS.showTabBarBadge();
+        })
+      }
+    })
+    AUTH.wxaCode().then(code => {
+      this.data.code = code
     })
   },
-  getPhoneNumber: function(e) {
-    if (!e.detail.errMsg || e.detail.errMsg != "getPhoneNumber:ok") {
+  async getUserApiInfo() {
+    const res = await WXAPI.userDetail(wx.getStorageSync('token'))
+    if (res.code == 0) {
+      let _data = {}
+      _data.apiUserInfoMap = res.data
+      if (res.data.base.mobile) {
+        _data.userMobile = res.data.base.mobile
+      }
+      if (res.data.base.nick && res.data.base.avatarUrl) {
+        _data.userInfoStatus = 2
+      } else {
+        _data.userInfoStatus = 1
+      }
+      if (this.data.order_hx_uids && this.data.order_hx_uids.indexOf(res.data.base.id) != -1) {
+        _data.canHX = true // 具有扫码核销的权限
+      }
+      const adminUserIds = wx.getStorageSync('adminUserIds')
+      if (adminUserIds && adminUserIds.indexOf(res.data.base.id) != -1) {
+        _data.isAdmin = true
+      }
+      if (res.data.peisongMember && res.data.peisongMember.status == 1) {
+        _data.memberChecked = false
+      } else {
+        _data.memberChecked = true
+      }
+      this.setData(_data);
+    }
+  },
+  async memberCheckedChange() {
+    const res = await WXAPI.peisongMemberChangeWorkStatus(wx.getStorageSync('token'))
+    if (res.code != 0) {
+      wx.showToast({
+        title: res.msg,
+        icon: 'none'
+      })
+    } else {
+      this.getUserApiInfo()
+    }
+  },
+  getUserAmount: function () {
+    var that = this;
+    WXAPI.userAmount(wx.getStorageSync('token')).then(function (res) {
+      if (res.code == 0) {
+        that.setData({
+          balance: res.data.balance.toFixed(2),
+          freeze: res.data.freeze.toFixed(2),
+          score: res.data.score,
+          growth: res.data.growth
+        });
+      }
+    })
+  },
+  handleOrderCount: function (count) {
+    return count > 99 ? '99+' : count;
+  },
+  orderStatistics: function () {
+    WXAPI.orderStatistics(wx.getStorageSync('token')).then((res) => {
+      if (res.code == 0) {
+        const {
+          count_id_no_confirm,
+          count_id_no_pay,
+          count_id_no_reputation,
+          count_id_no_transfer,
+        } = res.data || {}
+        this.setData({
+          count_id_no_confirm: this.handleOrderCount(count_id_no_confirm),
+          count_id_no_pay: this.handleOrderCount(count_id_no_pay),
+          count_id_no_reputation: this.handleOrderCount(count_id_no_reputation),
+          count_id_no_transfer: this.handleOrderCount(count_id_no_transfer),
+        })
+      }
+    })
+  },
+  goAsset: function () {
+    wx.navigateTo({
+      url: "/pages/asset/index"
+    })
+  },
+  goScore: function () {
+    wx.navigateTo({
+      url: "/pages/score/index"
+    })
+  },
+  goOrder: function (e) {
+    wx.navigateTo({
+      url: "/pages/order-list/index?type=" + e.currentTarget.dataset.type
+    })
+  },
+  scanOrderCode(){
+    wx.scanCode({
+      onlyFromCamera: true,
+      success(res) {
+        wx.navigateTo({
+          url: '/pages/order-details/scan-result?hxNumber=' + res.result,
+        })
+      },
+      fail(err) {
+        console.error(err)
+        wx.showToast({
+          title: err.errMsg,
+          icon: 'none'
+        })
+      }
+    })
+  },
+  goadmin() {
+    wx.navigateToMiniProgram({
+      appId: 'wx5e5b0066c8d3f33d',
+      path: 'pages/login/auto?token=' + wx.getStorageSync('token'),
+      envVersion: 'trial' // develop trial release
+    })
+  },
+  async updateUserInfo(e) {
+    if (!e.detail.errMsg || e.detail.errMsg != "getUserInfo:ok") {
       wx.showModal({
         title: '提示',
-        content: '无法获取手机号码',
+        content: e.detail.errMsg,
         showCancel: false
       })
       return;
     }
-    var that = this;
-    wx.request({
-      url: 'https://api.it120.cc/' + app.globalData.subDomain + '/user/wxapp/bindMobile',
-      data: {
+    wx.showLoading({
+      title: '',
+    })
+    const res = await WXAPI.encryptedData(this.data.code, e.detail.encryptedData, e.detail.iv)
+    wx.hideLoading({
+      success: (res) => {},
+    })
+    AUTH.wxaCode().then(code => {
+      this.data.code = code
+    })
+    if (res.code == 0) {
+      // 更新用户资料
+      await WXAPI.modifyUserInfo({
         token: wx.getStorageSync('token'),
-        encryptedData: e.detail.encryptedData,
-        iv: e.detail.iv
-      },
-      success: function (res) {
-        if (res.data.code == 0) {
-          wx.showToast({
-            title: '绑定成功',
-            icon: 'success',
-            duration: 2000
-          })
-          that.getUserApiInfo();
-        } else {
-          wx.showModal({
-            title: '提示',
-            content: '绑定失败',
-            showCancel: false
-          })
-        }
-      }
-    })
+        avatarUrl: res.data.avatarUrl,
+        nick: res.data.nickName,
+        province: res.data.province,
+        city: res.data.city,
+        gender: res.data.gender,
+      })
+      this.getUserApiInfo();
+    } else {
+      wx.showModal({
+        title: '错误',
+        content: res.msg,
+        showCancel: false
+      })
+    }
   },
-  getUserApiInfo: function () {
-    var that = this;
-    wx.request({
-      url: 'https://api.it120.cc/' + app.globalData.subDomain + '/user/detail',
-      data: {
-        token: wx.getStorageSync('token')
-      },
-      success: function (res) {
-        if (res.data.code == 0) {
-          that.setData({
-            apiUserInfoMap: res.data.data,
-            userMobile: res.data.data.base.mobile
-          });
-        }
-      }
-    })
-
-  },
-  getUserAmount: function () {
-    var that = this;
-    wx.request({
-      url: 'https://api.it120.cc/' + app.globalData.subDomain + '/user/amount',
-      data: {
-        token: wx.getStorageSync('token')
-      },
-      success: function (res) {
-        if (res.data.code == 0) {
-          that.setData({
-            balance: res.data.data.balance,
-            freeze: res.data.data.freeze,
-            score: res.data.data.score
-          });
-        }
-      }
-    })
-
-  },
-  checkScoreSign: function () {
-    var that = this;
-    wx.request({
-      url: 'https://api.it120.cc/' + app.globalData.subDomain + '/score/today-signed',
-      data: {
-        token: wx.getStorageSync('token')
-      },
-      success: function (res) {
-        if (res.data.code == 0) {
-          that.setData({
-            score_sign_continuous: res.data.data.continuous
-          });
-        }
-      }
-    })
-  },
-  scoresign: function () {
-    var that = this;
-    wx.request({
-      url: 'https://api.it120.cc/' + app.globalData.subDomain + '/score/sign',
-      data: {
-        token: wx.getStorageSync('token')
-      },
-      success: function (res) {
-        if (res.data.code == 0) {
-          that.getUserAmount();
-          that.checkScoreSign();
-        } else {
-          wx.showModal({
-            title: '错误',
-            content: res.data.msg,
-            showCancel: false
-          })
-        }
-      }
-    })
-  },
-  relogin:function(){
-    wx.navigateTo({
-      url: "/pages/authorize/index"
-    })
-  },
-  recharge: function () {
-    wx.navigateTo({
-      url: "/pages/recharge/index"
-    })
-  },
-  withdraw: function () {
-    wx.navigateTo({
-      url: "/pages/withdraw/index"
-    })
-  }
 })

@@ -1,4 +1,9 @@
-@import "/wxParse/wxParse.wxss";
+@import "/template/login/index.wxss";
+
+page,view,image,input,textarea {
+  display: block;
+  box-sizing: border-box;
+}
 
 .container {
   background-color: #F2f2f2;
@@ -20,69 +25,44 @@ swiper-item image {
   overflow: hidden;
   height:748rpx;
 }
-.swiper-container .dots{  
-  position: absolute;  
-  left: 0;  
-  right: 0;  
-  bottom: 20rpx;  
-  display: flex;  
-  justify-content: center;  
-}  
-.swiper-container .dots .dot{  
-  margin: 0 8rpx;  
-  width: 14rpx;  
-  height: 14rpx;  
-  background: #000;  
-  border-radius: 50%;  
-  transition: all .6s;  
-  opacity: .3;
-}  
-.swiper-container .dots .dot.active{  
-  opacity: .6;
-}
 .goods-info{
   background-color: #fff;
-  padding: 35rpx 0;
-  margin-bottom: 24rpx;
+  padding-top: 35rpx;
   width: 100%;
   position: relative;
 }
-
 .goods-info-fx {
   position: absolute;
-  width: 50px;
-  height: 60px;
-  right: 0;
-  top: 0;
+  right: 35rpx;
+  bottom: 60rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 130rpx;
 }
-
-.goods-info-fx button {
+.goods-info-fx .item {
+  width: 50rpx;
+  height: 50rpx;
+  right: 130rpx;
+  top: 100rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 24rpx;
+  background: #fff;
+  z-index: 20;
+} 
+.goods-info-fx .item image {
+  width: 50rpx;
+  height: 50rpx;
+}
+.goods-info-fx .item button {
   position: absolute;
-  width: 50px;
-  height: 60px;
-  top: 0;
-  left: 0;
-  z-index: 2;
+  height: 100%;
+  width: 100%;
   opacity: 0;
-}
-
-.goods-info-fx image {
-  width: 30px;
-  height: 30px;
-  position: absolute;
-  top: 0;
-  left: 0;
-  z-index: 1;
-  margin: 10px 10px 0 5px;
-}
-
-.goods-info-fx text {
-  position: absolute;
-  bottom: 3px;
-  left: 0;
-  z-index: 1;
-  font-size: 10px;
-  text-align: center;
+  z-index: 99;
 }
 .goods-info .goods-title{
   box-sizing: border-box;
@@ -91,7 +71,6 @@ swiper-item image {
   line-height: 1.4;
   color: #000;
   margin-bottom: 28rpx;
-  padding-right: 60px;
 }
 .goods-info .goods-share{
   box-sizing: border-box;
@@ -101,27 +80,38 @@ swiper-item image {
   color: #CC0000;
   margin-bottom: 28rpx;
 }
-.goods-info .goods-price{
-   box-sizing:border-box;
-   color:#e64340;
-   font-size: 28rpx;
-   font-weight: bold;
-   width: 30%;
-   float:left;
+.goods-profile {
+  display: flex;
+  align-items:center;
 }
-.row-arrow{
-  width: 100%;
-  box-sizing: border-box;
-  padding: 0  120rpx 0 35rpx;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  overflow: hidden;
+.goods-profile .p{
+   color:#e64340;
+   font-size: 20pt;
+   margin-left: 30rpx;
+}
+.goods-profile .p text{
+   font-size: 12pt;
+}
+.goods-profile .r{
+   color:#ccc;
+   font-size: 10pt;
+   margin-left: 30rpx;
+}
+.row-arrow {
+  width: 100vw;
+  padding: 0 32rpx;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   height: 102rpx;
   font-size: 28rpx;
   line-height: 102rpx;
-  margin-bottom: 28rpx;
-  background: #fff url(https://cdn.it120.cc/images/weappshop/arrow-right.png) no-repeat 697rpx center;
-  background-size: 18rpx auto;
+  background: #fff;
+  margin-bottom: 32rpx;
+}
+.row-arrow image {
+  width: 40rpx;
+  height: 40rpx;
 }
 .goods-des-info{
   width: 100%;
@@ -140,6 +130,9 @@ swiper-item image {
   line-height: 56rpx;
   margin-bottom: 30rpx;
 }
+.goods-text image{
+  width: 100%;
+}
 .des-imgs{
   width:100%;
 }
@@ -154,52 +147,69 @@ swiper-item image {
   bottom: 0;
   left: 0;
   display: flex;
-  box-shadow:0 0 8rpx 0 ;
+  box-shadow:0 0 1rpx 0 ;
+  align-items: center;
 }
 .footer-box .contact {
   position: relative;
-  width: 120rpx;
   height: 100%;
   display: flex;
-  flex-direction: column;
+  justify-content: center;
   align-items: center;
-  /*line-height: 100rpx;
-  text-align: center;
-  padding-top: 26rpx;*/
-  font-size: 20rpx;
-  color: #008000;
-  box-sizing: border-box;
-  background: url("https://cdn.it120.cc/images/weappshop/kefu.png") no-repeat center 21rpx;
-  background-size: 55rpx auto;
+  margin-left: 32rpx;
+}
+.footer-box .contact button {
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  opacity: 0;
+  z-index: 99;
+}
+.footer-box .contact image {
+  width: 60rpx;
+  height: 60rpx;
 }
 .footer-box .shop-cart-btn {
   position: relative;
-  width: 135rpx;
   height: 100%;
   display: flex;
-  flex-direction: column;
+  justify-content: center;
   align-items: center;
-  text-align: center;
-  font-size: 20rpx;
-  color: #acacb7;
-  box-sizing: border-box;
-  background: url("https://cdn.it120.cc/images/weappshop/cart.png") no-repeat center 21rpx; 
-  background-size: 44rpx auto;
+  margin-left: 32rpx;
+}
+.footer-box .shop-cart-btn image {
+  width: 55rpx;
+  height: 55rpx;
+}
+.fav-icon {
+  width: 60rpx;
+  height: 60rpx;
+  margin-left: 32rpx;
+  /*707070*/
 }
 .footer-box .shop-cart-btn .shop-num{
   position: absolute;
-  color:#e64340;
-  left: 85rpx;
+  color:#fff;
+  left: 32rpx;
   top:10rpx;
+
+  width: 40rpx;
+  height: 40rpx;
+  line-height: 40rpx;
+  text-align: center;
+  border-radius: 50%;
+  background: #e64340;
+  font-size: 24rpx;
 }
 .footer-box .join-shop-cart{
   text-align: center;
-  width: 250rpx;
   height: 100%;
   line-height: 100rpx;
   background-color: #ff6850;
   color:#fff;
   font-size: 34rpx;
+  flex: 1;
+  margin-left: 32rpx;
 }
 .footer-box .now-buy{
   text-align: center;
@@ -209,6 +219,7 @@ swiper-item image {
   background-color: #e64340;
   color:#fff;
   font-size: 34rpx;
+  flex: 1;
 }
 .show-popup{
   position: fixed;
@@ -216,7 +227,7 @@ swiper-item image {
   left: 0;
   width:100%;
   height: 100%;
-  z-index: 4;
+  z-index: 999;
 }
 .popup-mask{
   position: fixed;
@@ -237,9 +248,10 @@ swiper-item image {
 }
 .pop-goods-info{
   display: flex;
-  flex-direction: row;
+  justify-content: space-between;
   align-items: center;
-  margin-left: 30rpx;
+  margin-left: 32rpx;
+  margin-right: 32rpx;
   padding: 30rpx 0;
   border-bottom: 1px solid #eee;
 }
@@ -261,19 +273,27 @@ swiper-item image {
   font-size:26rpx;
   color:#000000;
 }
-.pop-goods-price{
+.pop-goods-price {
   font-size:26rpx;
   color:#e64340;
   margin-top:20rpx; 
 }
+.pop-goods-price .t1 {
+  font-size:50rpx;
+}
+.pop-goods-price-original{
+  font-size:26rpx;
+  color: #aaa;
+  text-decoration: line-through;
+  margin-left: 16rpx;
+}
 .pop-goods-close{
   width: 36rpx;
   height: 36rpx;
-  flex: 1;
-  background:url("https://cdn.it120.cc/images/weappshop/popup-close.png") no-repeat center center;
-  background-size: 36rpx auto;
-  align-self: flex-start;
-  margin-top: -10rpx;
+}
+.size-label-box2 {
+  width: 100vw;
+  background: #fff;
 }
 .size-label-box  .label{
   font-size:26rpx;
@@ -341,4 +361,154 @@ swiper-item image {
 }
 .buy-num-box .num-box .hui{
   background-color: #f5f5f9;
+}
+.curKanjiaprogress {
+  width:750rpx;
+  background-color:#fff;
+  margin-top:20rpx;
+}
+.curKanjiaprogress .name {
+  font-size: 40rpx;
+  padding:20rpx;
+  text-align: center;
+}
+.curKanjiaprogress .weui-badge {
+  margin-left:250rpx;
+}
+.curKanjiaprogress .placeholder {
+  margin-left:30rpx;
+  margin-right:30rpx;
+  text-align: center;
+  font-size: 26rpx;
+  width:100rpx;
+  color:#999;
+}
+.curKanjiaprogress .kjbutton {
+  padding:30rpx;
+}
+.kjBuyButton {
+  position: fixed;
+  left: 0;
+  bottom: calc(env(safe-area-inset-bottom) / 2);
+  width:750rpx;
+  display: flex;
+}
+.kjBuyButton .item {
+  flex: 1;
+}
+.shareFloatDiv1 {
+  position:fixed;
+  top: 0px;
+  left: 0px;
+  width:100vw;
+  height:100vh;
+  background-color:#555;filter:Alpha(Opacity=60);opacity:0.6;
+  z-index: 99998;
+}
+.shareFloatDiv2 {
+  position:fixed;
+  width:100%;
+  height:400rpx;
+  background-color: #ffffff;
+  bottom: 0rpx;
+  z-index: 99999;
+}
+.shareFloatDiv2 .p1 {
+  height:260rpx;
+}
+.shareFloatDiv2 .p2 {
+  height:20rpx;
+  background-color: #EEEEEE;
+}
+.shareFloatDiv2 .p3 {
+  height:120rpx;
+  line-height: 120rpx;
+  text-align: center;
+  color:#555555;
+  font-size: 16px;
+}
+.qrcode-button {
+  padding:30rpx;
+  margin-top:50rpx;
+}
+.qrcode {
+  width:300rpx;
+  height:300rpx;
+  margin-top: 50rpx;
+}
+
+
+
+.posterImg-box {
+  position: absolute;
+  top: 64rpx;
+  left: 32rpx;
+  width: 686rpx;
+  margin-bottom: 100rpx;
+  z-index: 999999;
+}
+.posterImg {  
+  width: 100%;
+}
+.btn-create {
+  margin: 32rpx;
+  margin-bottom: 0;
+  height: 88rpx;
+  line-height: 88rpx;
+  background: #e64340;
+  color: #fff;
+  text-align: center;
+  border-radius: 8rpx;
+}
+.clearfix:after{/*伪元素是行内元素 正常浏览器清除浮动方法*/
+    content: "";
+    display: block;
+    height: 0;
+    clear:both;
+    visibility: hidden;
+}
+.shop-container {
+  width: 100vw;
+  margin: 32rpx 0rpx;
+  padding: 32rpx;
+  display: flex;
+  align-items: center;
+  background: #fff;
+}
+.shop-container image {
+  width: 90rpx;
+  height: 90rpx;
+}
+.shop-container .info {
+  margin-left: 32rpx;
+}
+.shop-container .info .title {
+  font-size: 30rpx;
+  color: #333;
+}
+.shop-container .info .address {
+  font-size: 26rpx;
+  color: #666;
+}
+.reputation-cell {
+  padding-bottom: 0rpx !important;
+  --cell-icon-size: 88rpx;
+}
+.reputation-cell .van-icon {
+  top: 16rpx !important;
+}
+.reputation-cell-reamrk {
+  padding-left: 96rpx;
+}
+.reputation-pics {
+  width: 100vw;
+  display: flex;
+  flex-wrap: wrap;
+  background: #ffffff;
+}
+.reputation-pics image {
+  width: 207rpx;
+  height: 207rpx;
+  margin: 32rpx 0 0 32rpx;
+  border-radius: 16rpx;
 }
